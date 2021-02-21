@@ -1,5 +1,8 @@
 #!/bin/python3
 
+from collections import deque
+import copy
+
 
 def word_ladder(start_word, end_word, dictionary_file='words5.dict'):
     '''
@@ -16,18 +19,40 @@ def word_ladder(start_word, end_word, dictionary_file='words5.dict'):
     ```
     may give the output
     ```
-    ['stone', 'shone', 'phone', 'phony', 'peony', 'penny', 'benny', 'bonny', 'boney', 'money']
+    ['stone', 'shone', 'phone', 'phony', 'peony', 'penny',
+    'benny', 'bonny', 'boney', 'money']
     ```
     but the possible outputs are not unique,
     so you may also get the output
     ```
-    ['stone', 'shone', 'shote', 'shots', 'soots', 'hoots', 'hooty', 'hooey', 'honey', 'money']
+    ['stone', 'shone', 'shote', 'shots', 'soots',
+    'hoots', 'hooty', 'hooey', 'honey', 'money']
     ```
     (We cannot use doctests here because the outputs are not unique.)
 
     Whenever it is impossible to generate a word ladder between the two words,
     the function returns `None`.
     '''
+    f = open(dictionary_file)
+    listed = f.read().split("\n")
+    stack = []
+    stack.append(start_word)
+    q = deque()
+    q.append(stack)
+    if start_word == end_word:
+        return stack
+    else:
+        while len(q) != 0:
+            dequeued = q.popleft()
+            for word in set(listed):
+                if _adjacent(word, dequeued[-1]):
+                    if word == end_word:
+                        dequeued.append(word)
+                        return dequeued
+                    stackcopy = copy.deepcopy(dequeued)
+                    stackcopy.append(word)
+                    q.append(stackcopy)
+                    listed.remove(word)
 
 
 def verify_word_ladder(ladder):
@@ -40,6 +65,18 @@ def verify_word_ladder(ladder):
     >>> verify_word_ladder(['stone', 'shone', 'phony'])
     False
     '''
+    char = 0
+    if ladder == []:
+        return False
+    for i in range(len(ladder) - 1):
+        if _adjacent(ladder[i], ladder[i+1]):
+            char += 0
+        else:
+            char += 1
+    if char == 0:
+        return True
+    else:
+        return False
 
 
 def _adjacent(word1, word2):
@@ -52,3 +89,16 @@ def _adjacent(word1, word2):
     >>> _adjacent('stone','money')
     False
     '''
+    char = 0
+    if word1 == word2:
+        return False
+    if len(word1) == len(word2):
+        for i in range(len(word1)):
+            if word1[i] != word2[i]:
+                char += 1
+        if char == 1:
+            return True
+        else:
+            return False
+    else:
+        return False
